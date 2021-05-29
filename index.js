@@ -20,7 +20,6 @@ class Output {
             }
         }
 
-
         // if no port was specified, automatically detect the port from port pool
         if (!this.port && this.port != 0) {
             this.port = -1;
