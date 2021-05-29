@@ -40,8 +40,6 @@ class Output {
             }
         }
 
-        console.log(this.port, output.getPortCount())
-
         if (this.port >= output.getPortCount()) {
             return {
                 "status": 400,
@@ -240,15 +238,16 @@ class Input extends Output {
             return "Selected port is not a supported VYPYR port, try another one.";
         }
 
+        let i = 0;
+
         // Configure a callback.
         input.on('message', (deltaTime, message) => {
             // The message is an array of numbers corresponding to the MIDI bytes:
             //   [status, data1, data2]
             // https://www.cs.cf.ac.uk/Dave/Multimedia/node158.html has some helpful
             // information interpreting the messages.
-            const msg = message.split(" ");
-
-            console.log(`##################\nprogram: ${msg[0]},\nctrlr: ${msg[1]},\nvalue: ${msg[2]}\ndelta time: ${deltaTime}`);
+            i++
+            console.log(`\n#${i}\nprogram: ${message[0]},\nctrlr: ${message[1]},\nvalue: ${message[2]}\ndelta time: ${deltaTime}`);
         });
 
         // open the connection
