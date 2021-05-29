@@ -1,6 +1,6 @@
 {
   "name": "vypyr-connector",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Controller for Peavey VYPYR VIP series AMPs allowing you to take control of every knob configuration and preset",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,6 @@
   "homepage": "https://github.com/kunszg/vypyr-connector#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "got": "^11.8.2",
     "midi": "^1.0.4"
   }
 }
