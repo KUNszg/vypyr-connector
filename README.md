@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/vypyr-connector.svg)](https://badge.fury.io/js/vypyr-connector)
+
 # VYPYR connector
 With this module you can simply connect to your guitar amplifier (currently supports only Peavey VYPYR VIP series) and modify the current state of it using HTTP requests over remote server or integrating it with your application.
 ## Installation
