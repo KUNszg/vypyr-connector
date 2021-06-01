@@ -210,13 +210,15 @@ class Output {
     }
 }
 
+const EventEmitter = require('events');
+
 /* real time logging of changes in amp interface */
-class Input extends Output {
-    constructor(port) {
-        super(port)
+class Input extends EventEmitter {
+    constructor() {
+        super()
     }
 
-    get debug() {
+    connect(port) {
         const input = new midi.Input();
 
         if (!input.getPortCount()) {
@@ -224,41 +226,37 @@ class Input extends Output {
         }
 
         // if no port was specified, automatically detect the port from port pool
-        if (!this.port) {
-            this.port = -1;
+        if (!port) {
+            port = -1;
 
             for (let i = 0; i<input.getPortCount(); i++) {
                 if (input.getPortName(i).startsWith("VYPYR")) {
-                    this.port = i;
+                    port = i;
                     break;
                 }
             }
 
-            if (this.port === -1) {
+            if (port === -1) {
                 return "No VYPYR input ports were recognized on your device."
             }
         }
 
-        if (!input.getPortName(this.port).startsWith("VYPYR")) {
+        if (!input.getPortName(port).startsWith("VYPYR")) {
             return "Selected port is not a supported VYPYR port, try another one.";
         }
 
-        let i = 0;
-
         // Configure a callback.
         input.on('message', (deltaTime, message) => {
+            // deltaTime is a time difference in seconds between each action in interface
             // The message is an array of numbers corresponding to the MIDI bytes:
-            //   [status, data1, data2]
-            // https://www.cs.cf.ac.uk/Dave/Multimedia/node158.html has some helpful
-            // information interpreting the messages.
-            i++
-            console.log(`\n#${i}\nprogram: ${message[0]},\nctrlr: ${message[1]},\nvalue: ${message[2]}\ndelta time: ${deltaTime}`);
+            // [status, data1, data2]
+            this.emit('input', deltaTime.toFixed(5), message[0], message[1], message[2]);
         });
 
         // open the connection
-        input.openPort(this.port);
+        input.openPort(port);
 
-        return `Successfully connected to ${input.getPortName(this.port)}`;
+        return `Successfully connected to ${input.getPortName(port)}`;
     }
 }
 
@@ -297,4 +295,4 @@ class Server extends Input {
     }
 }
 
-module.exports = Server;
+module.exports = { Server, Input };

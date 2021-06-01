@@ -1,7 +1,7 @@
 [![npm version](https://badge.fury.io/js/vypyr-connector.svg)](https://badge.fury.io/js/vypyr-connector)
 
 # VYPYR connector
-With this module you can simply connect to your guitar amplifier (currently supports only Peavey VYPYR VIP series) and modify the current state of it using HTTP requests over remote server or integrating it with your application.
+With this module you can receive messages via events from your guitar amplifier (currently supports only Peavey VYPYR VIP series) and modify the current state of the amp by using built in classes.
 ## Installation
 Installation uses node-gyp and requires Python 3.7 or higher.
 ```
@@ -22,31 +22,39 @@ For example:
 [176, 10, 0]
 // [program, ctrlr, value]
 ```
-means that on the amp we are selecting program `176` with ctrlr `10` and value that stands for the effect that we want to select which is `0`. This would change the inst/stomp effect on the amp to rmod.
 
-For full list of Peavey MIDI status codes see https://github.com/KUNszg/vypyr-connector/blob/main/controls.json
+For full list of Peavey MIDI status codes see:
+https://github.com/KUNszg/vypyr-connector/blob/main/controls.json
 
 ## Capturing input
 ```javascript
-const Midi = require("vypyr-connector");
-console.log(new Midi().debug);
-// to select the port manually use new Midi(YOUR_PORT).debug
+const Midi = require("vypyr-connector").Input;
 
-// Example of action detected in amp interface
-// #1
+const vypyr = new Midi();
+
+// suitable port gets detected automatically
+// if needed, provide a MIDI port in argument of the below method
+// this is usually in range of 0 to 3
+vypyr.connect();
+
+vypyr.on('input', (timing, program, ctrlr, value) => {
+    console.log(`\nprogram: ${program},\nctrlr: ${ctrlr},\nvalue: ${value}\ntiming: ${timing}`);
+});
+
+// Example response:
+//
 // program: 176,
 // ctrlr: 16,
-// value: 127
-// delta time: 0
+// value: 116
+// timing: 0.05000
 //
-// #2
 // program: 176,
 // ctrlr: 16,
 // value: 121
-// delta time: 0.9
+// timing: 0.15000
 // ...
 ```
-## Output (sending commands to amp)
+## Sending output
 ```javascript
 const Midi = require("vypyr-connector");
 console.log(new Midi().send(176, 10, 0))
