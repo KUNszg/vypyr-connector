@@ -1,5 +1,6 @@
 const data = require('./controls.json');
 const midi = require('midi');
+const app = require('express')();
 
 class Output {
     constructor (port) {
@@ -9,6 +10,11 @@ class Output {
         }
     }
 
+    /* For controllers that deal with two-state parameters such as an on/off control,
+     * the data value of 0x00 means OFF and the value of 0x7F means ON. For controllers
+     * in which the data value range is not specified, the range can be assumed
+     * to be 0x00 (minimum setting) to 0x7F (maximum setting).
+     */
     send(program, ctrlr, value) {
         // Set up a new output.
         const output = new midi.Output();
@@ -257,19 +263,7 @@ class Input extends Output {
 }
 
 class Server extends Input {
-    get startApi() {
-        const app = require('express')();
-
-        /* For controllers that deal with two-state parameters such as an on/off control,
-         * the data value of 0x00 means OFF and the value of 0x7F means ON. For controllers
-         * in which the data value range is not specified, the range can be assumed
-         * to be 0x00 (minimum setting) to 0x7F (maximum setting).
-         */
-        app.get("/controller", (req, res) => {
-            res.status(405);
-            res.send("Please use a POST method.");
-        });
-
+    get receive() {
         app.post("/controller", (req, res) => {
             let program, ctrlr, value, port;
 
