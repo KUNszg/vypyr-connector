@@ -1,7 +1,7 @@
 [![npm version](https://badge.fury.io/js/vypyr-connector.svg)](https://badge.fury.io/js/vypyr-connector)
 
 # VYPYR connector
-With this module you can receive messages via events from your guitar amplifier (currently supports only Peavey VYPYR VIP series) and modify the current state of the amp by using built in classes.
+With this module you can receive messages via events from your guitar amplifier (currently supports only Peavey VYPYR VIP series) and modify the current state of the amp by using HTTP requests or provided classes.
 ## Installation
 Installation uses node-gyp and requires Python 3.7 or higher.
 ```
@@ -75,7 +75,7 @@ console.log(vypyr.send(176, 10, 0))
 ```
 ## Web API
 
-````javascript
+```javascript
 const Midi = require("vypyr-connector");
 
 const vypyr = new Midi()
@@ -89,8 +89,8 @@ vypyr.express();
 ```
 
 ```sh
-// send the request
+# send the request
 curl -X POST -H "program: 176" -H "ctrlr: 10" -H "value: 0" "http://localhost:8080/controller"
 
-// => Message successfully sent to VYPYR USB Interface 1 on port id 1
+# Message successfully sent to VYPYR USB Interface 1 on port id 1
 ```
