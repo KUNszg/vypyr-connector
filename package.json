@@ -1,6 +1,6 @@
 {
   "name": "vypyr-connector",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Controller for Peavey VYPYR VIP series AMPs allowing you to take control of every knob configuration and preset",
   "main": "index.js",
   "scripts": {
