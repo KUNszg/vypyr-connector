@@ -1,9 +1,60 @@
 const data = require('./controls.json');
 const midi = require('midi');
 const app = require('express')();
+const EventEmitter = require('events');
 
-class Output {
+/* real time logging of changes in amp interface */
+class Input extends EventEmitter {
+    constructor() {
+        super()
+    }
+
+    connect(port) {
+        const input = new midi.Input();
+
+        if (!input.getPortCount()) {
+            return "no MIDI input devices were found";
+        }
+
+        // if no port was specified, automatically detect the port from port pool
+        if (!port) {
+            port = -1;
+
+            for (let i = 0; i<input.getPortCount(); i++) {
+                if (input.getPortName(i).startsWith("VYPYR")) {
+                    port = i;
+                    break;
+                }
+            }
+
+            if (port === -1) {
+                return "No VYPYR input ports were recognized on your device."
+            }
+        }
+
+        if (!input.getPortName(port).startsWith("VYPYR")) {
+            return "Selected port is not a supported VYPYR port, try another one.";
+        }
+
+        // Configure a callback.
+        input.on('message', (deltaTime, message) => {
+            // deltaTime is a time difference in seconds between each action in interface
+            // The message is an array of numbers corresponding to the MIDI bytes:
+            // [status, data1, data2]
+            this.emit('input', deltaTime.toFixed(5), message[0], message[1], message[2]);
+        });
+
+        // open the connection
+        input.openPort(port);
+
+        return `Successfully connected to ${input.getPortName(port)}`;
+    }
+}
+
+class Output extends Input {
     constructor (port) {
+        super(port);
+
         // make sure provided port is a Number type
         if (!isNaN(Number(port))) {
             this.port = Number(port);
@@ -208,60 +259,10 @@ class Output {
             return { "status": 404, "message": "Specified port could not be recognized as VYPYR port" }
         }
     }
-}
 
-const EventEmitter = require('events');
+    express(expressPort) {
+        this.expressPort = expressPort ?? 8080;
 
-/* real time logging of changes in amp interface */
-class Input extends EventEmitter {
-    constructor() {
-        super()
-    }
-
-    connect(port) {
-        const input = new midi.Input();
-
-        if (!input.getPortCount()) {
-            return "no MIDI input devices were found";
-        }
-
-        // if no port was specified, automatically detect the port from port pool
-        if (!port) {
-            port = -1;
-
-            for (let i = 0; i<input.getPortCount(); i++) {
-                if (input.getPortName(i).startsWith("VYPYR")) {
-                    port = i;
-                    break;
-                }
-            }
-
-            if (port === -1) {
-                return "No VYPYR input ports were recognized on your device."
-            }
-        }
-
-        if (!input.getPortName(port).startsWith("VYPYR")) {
-            return "Selected port is not a supported VYPYR port, try another one.";
-        }
-
-        // Configure a callback.
-        input.on('message', (deltaTime, message) => {
-            // deltaTime is a time difference in seconds between each action in interface
-            // The message is an array of numbers corresponding to the MIDI bytes:
-            // [status, data1, data2]
-            this.emit('input', deltaTime.toFixed(5), message[0], message[1], message[2]);
-        });
-
-        // open the connection
-        input.openPort(port);
-
-        return `Successfully connected to ${input.getPortName(port)}`;
-    }
-}
-
-class Server extends Input {
-    get receive() {
         app.post("/controller", (req, res) => {
             let program, ctrlr, value, port;
 
@@ -287,7 +288,7 @@ class Server extends Input {
             res.send(resp.message);
             console.log(resp.message);
         });
-        const server = app.listen(process.env.PORT || 8080, '0.0.0.0', () => {
+        const server = app.listen(process.env.PORT || this.expressPort, '0.0.0.0', () => {
             console.log('Server is running on port:', server.address().port);
         });
 
@@ -295,4 +296,4 @@ class Server extends Input {
     }
 }
 
-module.exports = { Server, Input };
+module.exports = Output;

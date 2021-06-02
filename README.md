@@ -28,7 +28,7 @@ https://github.com/KUNszg/vypyr-connector/blob/main/controls.json
 
 ## Capturing input
 ```javascript
-const Midi = require("vypyr-connector").Input;
+const Midi = require("vypyr-connector");
 
 const vypyr = new Midi();
 
@@ -38,7 +38,11 @@ const vypyr = new Midi();
 vypyr.connect();
 
 vypyr.on('input', (timing, program, ctrlr, value) => {
-    console.log(`\nprogram: ${program},\nctrlr: ${ctrlr},\nvalue: ${value}\ntiming: ${timing}`);
+    console.log(`
+        program: ${program},
+        ctrlr: ${ctrlr},
+        value: ${value}
+        timing: ${timing}`);
 });
 
 // Example response:
@@ -57,10 +61,13 @@ vypyr.on('input', (timing, program, ctrlr, value) => {
 ## Sending output
 ```javascript
 const Midi = require("vypyr-connector");
-console.log(new Midi().send(176, 10, 0))
-// to select the port manually use new Midi(YOUR_PORT).send(176, 10, 0)
 
-// response:
+// to select the port manually:
+// const vypyr = new Midi(<your_port>);
+const vypyr = new Midi();
+
+console.log(vypyr.send(176, 10, 0))
+
 // {
 //   status: 200,
 //   message: 'Message successfully sent to VYPYR USB Interface 1 on port id 1'
@@ -68,4 +75,22 @@ console.log(new Midi().send(176, 10, 0))
 ```
 ## Web API
 
-coming soon
+````javascript
+const Midi = require("vypyr-connector");
+
+const vypyr = new Midi()
+
+// port 8080 is selected automatically
+// if you wish to select another port:
+// vypyr.express(<your_port>)
+vypyr.express();
+// => Server is running on port: 8080
+
+```
+
+```sh
+// send the request
+curl -X POST -H "program: 176" -H "ctrlr: 10" -H "value: 0" "http://localhost:8080/controller"
+
+// => Message successfully sent to VYPYR USB Interface 1 on port id 1
+```
